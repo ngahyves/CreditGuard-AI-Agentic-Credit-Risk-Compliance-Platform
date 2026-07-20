@@ -22,14 +22,14 @@ untitled-1.md
 
 
 # --- Models & Artifacts ---
-models/*
+!models/fitted_preprocessor.joblib
+!models/unsupervised_artifacts.joblib.
 mlartifacts/
 mlruns/
 mlflow_db/
 mlflow.db
 catboost_info/
-!models/fitted_preprocessor.joblib
-!models/unsupervised_artifacts.joblib.
+
 
 
 # --- Monitoring & Vector Store ---
