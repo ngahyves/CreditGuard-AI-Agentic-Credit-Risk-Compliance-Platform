@@ -1,0 +1,79 @@
+name: IntelliLoan CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ] # Trigger main branch
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: northamerica-northeast1
+  ARTIFACT_REPO: intelliloan-repo
+  IMAGE_NAME: intelliloan-api
+  SERVICE_NAME: intelliloan-api
+
+jobs:
+  quality-assurance:
+    name: Unit Tests & Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install -r requirements.txt
+
+      - name: Run Pytest
+        run: python -m pytest tests/
+
+  build-and-deploy:
+    name: Build & Cloud Deploy
+    needs: quality-assurance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # 1. Google Cloud Authentication Using a JSON Key (GitHub Secret)
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      # 2. Configuring the Google Cloud SDK
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
+
+      # 3. Configuring Docker to Authenticate with the GCP Registry
+      - name: 'Configure Docker for GCP'
+        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+
+      # 4. Build Docker image
+      - name: Build and Push Container
+        run: |
+          docker build -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # 5. Automatic deployment on Google Cloud Run
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ vars.SERVICE_NAME }} \
+            --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/${{ vars.IMAGE_NAME }}:${{ github.sha }} \
+            --region ${{ vars.GCP_REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 4Gi \
+            --cpu 2 \
+            --timeout 300 \
+            --set-env-vars "API_KEY_SECRET=${{ secrets.API_KEY_SECRET }},\
+            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }},\
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},\
+            DATABASE_URL=${{ secrets.DATABASE_URL }},\
+            LANGCHAIN_API_KEY=${{ secrets.LANGCHAIN_API_KEY }},\
+            LANGCHAIN_TRACING_V2=${{ vars.LANGCHAIN_TRACING_V2 }},\
+            LANGCHAIN_PROJECT=${{ vars.LANGCHAIN_PROJECT }}"

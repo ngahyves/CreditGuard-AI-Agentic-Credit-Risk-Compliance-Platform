@@ -1,0 +1,8 @@
+```
+{
+    "faithfulness": 1.00,
+    "context_precision": 1.00,
+    "answer_relevancy": 1.00,
+    "audit_justification": "The generated memo accurately reflects the reference policy context. It correctly identifies the violation of the minimum down payment requirement and the insufficient EXT_SOURCE scores, directly leading to a decline recommendation. All facts and numbers are supported by the reference text, and only relevant rules are extracted and applied."
+}
+```

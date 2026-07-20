@@ -1,0 +1,69 @@
+# ---------------------------------------------------------
+# DEPLOYMENT: Defines the application lifecycle
+# ---------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: intelliloan-api
+  labels:
+    app: intelliloan
+spec:
+  replicas: 3 # Running 3 instances for High Availability
+  selector:
+    matchLabels:
+      app: intelliloan
+  template:
+    metadata:
+      labels:
+        app: intelliloan
+    spec:
+      containers:
+      - name: api-container
+        image: northamerica-northeast1-docker.pkg.dev/intelliloan-project/intelliloan-repo/intelliloan-api:v0.3.0
+        ports:
+        - containerPort: 8000
+        
+        # RESOURCE MANAGEMENT: Guaranteed performance
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+        # SELF-HEALING: Restarts the container if the health check fails
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        
+        # SECRETS: Fetched from Kubernetes Secret Manager
+        envFrom:
+        - secretRef:
+            name: intelliloan-secrets
+
+---
+# ---------------------------------------------------------
+# HPA: Horizontal Pod Autoscaler
+# ---------------------------------------------------------
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: intelliloan-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: intelliloan-api
+  minReplicas: 2
+  maxReplicas: 10 # Scale up to 10 instances under heavy load
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75

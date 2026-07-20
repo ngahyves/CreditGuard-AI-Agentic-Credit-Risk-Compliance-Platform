@@ -1,0 +1,50 @@
+# --- CORE DATA & ML ---
+pandas
+numpy
+pyarrow
+scikit-learn
+joblib
+pyyaml
+scipy
+
+# --- MODELS & OPTIMIZATION ---
+lightgbm
+xgboost
+catboost
+optuna
+
+# --- DATA QUALITY & VALIDATION ---
+pandera
+black # for generating automated schema
+pydantic
+pydantic-settings
+
+# --- UNSUPERVISED & MANIFOLD LEARNING ---
+hdbscan
+umap-learn
+kneed
+
+# --- EXPLAINABILITY & MONITORING ---
+shap
+mlflow
+evidently
+matplotlib
+seaborn
+
+# --- API & DATABASE ---
+fastapi
+uvicorn[standard]
+python-dotenv
+pyjwt
+sqlalchemy
+psycopg2-binary
+prometheus-client
+
+# --- AGENTIC RAG (GenAI) ---
+langchain
+langchain-google-genai
+langchain-groq
+langchain-chroma
+langchain-huggingface
+langgraph
+sentence-transformers

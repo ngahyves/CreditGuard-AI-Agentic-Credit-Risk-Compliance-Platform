@@ -1,0 +1,15 @@
+# ---------------------------------------------------------
+# SERVICE: Exposes the API to the Internet
+# ---------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: intelliloan-service
+spec:
+  type: LoadBalancer # Creates a public IP address on Google Cloud
+  selector:
+    app: intelliloan
+  ports:
+    - protocol: TCP
+      port: 80        # Public incoming port
+      targetPort: 8000 # Redirects to FastAPI internal port

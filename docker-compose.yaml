@@ -1,0 +1,66 @@
+
+
+services:
+  #Intelligence Engine (FastAPI)
+  api:
+    build: .
+    container_name: intelliloan-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    restart: always
+    networks:
+      - intelliloan-net
+
+  #Prometheus : for metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: intelliloan-prometheus
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - intelliloan-net
+    depends_on:
+      - api
+
+  #Grafana : System dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: intelliloan-grafana
+    user: "0"
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - intelliloan-net
+    depends_on:
+      - prometheus
+
+#MLflow Tracking Server
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.14.1
+    container_name: intelliloan-mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/app/mlruns
+      - ./mlflow_db:/app/mlflow_db
+    command: >
+      mlflow server 
+      --backend-store-uri sqlite:///app/mlflow_db/mlflow.db
+      --default-artifact-root /app/mlruns
+      --host 0.0.0.0
+      --port 5000
+    networks:
+      - intelliloan-net
+volumes:
+  mlflow_data:
+  mlruns_data:
+
+networks:
+  intelliloan-net:
+    driver: bridge

@@ -1,0 +1,29 @@
+
+!data/processed/
+
+# --- BLOCKED FOLDERS ---
+.git/
+.gitignore
+.dockerignore
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+credit_env/
+.env
+mlruns/
+mlartifacts/
+mlflow_db/
+mlflow.db
+catboost_info/
+notebooks/
+src/eda/
+reports/
+tests/
+test.tar.gz
+data/raw/
+data/interim/
+
+# --- PROCESSED FILES: EXCLUSIONS---
+data/processed/master_ingested_v0.3.0.parquet
+data/processed/ml_ready_matrix.parquet
+data/processed/final_modeling_table.parquet

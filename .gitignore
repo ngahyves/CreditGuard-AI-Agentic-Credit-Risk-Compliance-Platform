@@ -1,0 +1,37 @@
+# --- Python & Environments ---
+credit_env/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+test.tar.gz
+*.tar.gz
+
+# --- Secrets & Config ---
+.env
+config/secrets.yaml
+
+# --- Data (Very Important: avoid pushing large parquets) ---
+data/raw/
+data/interim/
+data/processed/*.parquet
+!data/processed/feature_metadata.json
+
+# --- Models & Artifacts ---
+models/*
+mlartifacts/
+mlruns/
+mlflow_db/
+mlflow.db
+catboost_info/
+!models/fitted_preprocessor.joblib
+
+
+# --- Monitoring & Vector Store ---
+data/sql/
+logs/
+
+# --- IDE ---
+.vscode/
+.idea/
