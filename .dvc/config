@@ -1,4 +1,6 @@
 [core]
-    remote = local_storage
+    remote = gcs_remote
 ['remote "local_storage"']
     url = C:/Users/Yves-Ricky/Desktop/intelliloan_dvc_storage
+['remote "gcs_remote"']
+    url = gs://intelliloan-artifacts
