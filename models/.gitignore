@@ -1,2 +1,5 @@
 /unsupervised_artifacts.joblib
 /champion_model.joblib
+/mitigated_model_equalized_odds_gender_group.joblib
+/mitigated_model_gender_group.joblib
+/fitted_preprocessor.joblib

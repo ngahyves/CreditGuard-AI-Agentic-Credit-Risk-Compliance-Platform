@@ -1,0 +1,5 @@
+outs:
+- md5: bcf507a006717e7da828a2bcb57da2c8
+  size: 16269
+  hash: md5
+  path: fitted_preprocessor.joblib

@@ -22,8 +22,6 @@ untitled-1.md
 
 
 # --- Models & Artifacts ---
-!models/fitted_preprocessor.joblib
-!models/unsupervised_artifacts.joblib.
 mlartifacts/
 mlruns/
 mlflow_db/
