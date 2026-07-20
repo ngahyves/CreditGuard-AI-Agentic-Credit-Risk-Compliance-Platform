@@ -15,8 +15,10 @@ config/secrets.yaml
 # --- Data (Very Important: avoid pushing large parquets) ---
 data/raw/
 data/interim/
-data/processed/*.parquet
 !data/processed/feature_metadata.json
+!/data/processed/final_enriched_modeling_matrix.parquet
+data/processed/*.parquet
+
 
 # --- Models & Artifacts ---
 models/*
