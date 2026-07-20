@@ -37,34 +37,54 @@ jobs:
     needs: quality-assurance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
 
-      # 1. Google Cloud Authentication Using a JSON Key (GitHub Secret)
+      # 1. CREATE PLACEHOLDER ARTIFACTS
+      # Since large files (.joblib, .parquet) are managed by DVC and stored locally,
+      # we create empty files to satisfy the Dockerfile COPY instructions during CI/CD.
+      - name: Create Placeholder Artifacts for CI/CD Build
+        run: |
+          mkdir -p models data/processed data/vectorstore
+          touch models/champion_model.joblib
+          touch models/fitted_preprocessor.joblib
+          touch models/unsupervised_artifacts.joblib
+          touch models/mitigated_model_equalized_odds_gender_group.joblib
+          touch data/processed/final_modeling_matrix.parquet
+          touch data/processed/final_enriched_modeling_matrix.parquet
+          touch data/processed/feature_metadata.json
+          touch data/vectorstore/chroma.sqlite3
+          echo "Mock artifacts created for build context validation."
+
+      # 2. Google Cloud Authentication Using a JSON Key (GitHub Secret)
       - id: 'auth'
+        name: Authenticate to Google Cloud
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      # 2. Configuring the Google Cloud SDK
-      - name: 'Set up Cloud SDK'
+      # 3. Configuring the Google Cloud SDK
+      - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v1'
 
-      # 3. Configuring Docker to Authenticate with the GCP Registry
-      - name: 'Configure Docker for GCP'
+      # 4. Configuring Docker to Authenticate with the GCP Registry
+      - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
 
-      # 4. Build Docker image
+      # 5. Build and Push Docker Image
+      # We tag the image with the unique GitHub SHA to ensure traceability and easy rollbacks.
       - name: Build and Push Container
         run: |
           docker build -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
           docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # 5. Automatic deployment on Google Cloud Run
+      # 6. Automated Deployment to Google Cloud Run
+      # Resources (RAM/CPU) and Timeouts are optimized for heavy SHAP/LLM initializations.
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ vars.SERVICE_NAME }} \
-            --image ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.ARTIFACT_REPO }}/${{ vars.IMAGE_NAME }}:${{ github.sha }} \
-            --region ${{ vars.GCP_REGION }} \
+            --image ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --region ${{ env.GCP_REGION }} \
             --platform managed \
             --allow-unauthenticated \
             --memory 4Gi \

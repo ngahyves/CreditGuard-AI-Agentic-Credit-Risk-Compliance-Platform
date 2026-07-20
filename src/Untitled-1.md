@@ -288,6 +288,10 @@ Son objectif unique est de détruire le risque d'hallucination pendant que ton c
 #### "Mais si vous n'avez pas mis le modèle de 219 Mo sur Git, comment Kubernetes le récupère ?"
 "Dans ce projet, j'utilise Git uniquement pour la logique logicielle. Les artefacts lourds comme le modèle de clustering (219 Mo) sont gérés par un Artifact Registry (ou stockés sur Google Cloud Storage). Lors du build de l'image Docker dans le pipeline CI/CD, le système récupère automatiquement la version certifiée du modèle pour l'intégrer au conteneur, garantissant ainsi un dépôt Git léger et une traçabilité totale via MLflow
 
+#### "Pourquoi votre DVC pointe vers un chemin local ?"
+Ta réponse "Senior" :
+"Pour ce MVP, j'ai implémenté un système de versionnage hybride. Git gère la logique applicative tandis que DVC assure le lignage des données via un stockage découplé. J'ai configuré un 'Local Remote' pour simuler un environnement de stockage On-Premise (serveur de fichiers interne). Cette architecture est Cloud-Agnostic : pour passer en production sur GCP ou AWS, il me suffirait de modifier une seule ligne de commande pour rediriger le flux DVC vers un bucket S3 ou GCS, sans jamais impacter le code source
+
 ### problem
 #### problem 1
 * silent failure of features names created by columnTransformer due to verbose_feature_names_out=False
@@ -486,8 +490,15 @@ src.pipelines.main_low.py
 * Creation de .gitignore
 *Lier le projet local a github
 * Creer les clés de connection: On va dans Settings > Secrets and variables > Actions sur GitHub pour ajouter les clés :
-GCP_SA_KEY : Ta clé de compte de service Google.
-GCP_PROJECT_ID : Ton ID de projet Google. S
+Pour que ce script ne crashe pas, tu dois ajouter les secrets suivants dans ton repo 
+
+GitHub (Settings > Secrets and variables > Actions) :
+GCP_SA_KEY : Le contenu de ton fichier JSON de compte de service.
+GCP_PROJECT_ID : Ton ID de projet (ex: intelliloan-project).
+API_KEY_SECRET : Ta clé de sécurité pour l'API.
+GROQ_API_KEY : Ta clé Groq.
+GEMINI_API_KEY : Ta clé Gemini.
+DATABASE_URL : Ton URL Neon.
 
 GCP m'a donné cet ID: **(intelliloan-project)**
 
@@ -543,14 +554,52 @@ Clique sur Créer.
 * Vérifier la CI/CD
 
 # GCP
+```
+ https://intelliloan-api-857396236875.northamerica-northeast1.run.app/docs
 
- https://intelliloan-api-857396236875.northamerica-northeast1.run.app
-````
+```
 
 
 
 # dvc
 
+* Étape 1 : Création du "Coffre-fort" (Le Remote Local)
+On va créer un dossier en dehors de ton projet Git qui servira de serveur de stockage.
+Remonte d'un niveau et crée le dossier :
+==>cd ..
+==>mkdir intelliloan_dvc_storage
+==>cd credit_project
+
+* Étape 2 : Configuration de DVC vers ce dossier
+On dit à DVC d'utiliser ce nouveau dossier comme destination pour tes gros fichiers.
+Ajoute le dossier comme stockage par défaut (le chemin doit être absolu pour éviter tout problème)
+==> dvc remote add -d local_storage C:/Users/Yves-Ricky/Desktop/intelliloan_dvc_storage
+
+Enregistre ce changement dans Git :
+==>git add .dvc/config
+==>git commit -m "build: change DVC remote to local storage vault"
+
+* Étape 3 : Ajouter les fichiers à DVC (Tracking)
+C'est ici que tu désignes les fichiers que Git ne doit pas toucher.
+Ajoute les modèles et les données lourdes :
+
+==>dvc add models/unsupervised_artifacts.joblib
+==>dvc add models/champion_model.joblib
+==> dvc add data/processed/final_enriched_modeling_matrix.parquet
+==> dvc add data/processed/final_enriched_modeling_matrix.parquet
+==> dvc add models/mitigated_model_equalized_odds_gender_group.joblib
+==>dvc add models/mitigated_model_gender_group.joblib
+
+Vérification : DVC a créé des fichiers .dvc. Vérifie avec ls models/. Tu devrais voir champion_model.joblib.dvc.
 
 
- 
+* Étape 5 : Synchronisation finale (Pousser les données)
+C'est l'étape de sauvegarde réelle.
+Envoie les fichiers vers le coffre-fort :
+
+==>dvc push
+C'est instantané car c'est sur ton disque dur.Envoie les "tickets de caisse" (.dvc) vers GitHub :
+
+==>git add models/*.dvc data/processed/*.dvc .gitignore
+==>git commit -m "feat: track ML artifacts with DVC local remote"
+==>git push origin main
