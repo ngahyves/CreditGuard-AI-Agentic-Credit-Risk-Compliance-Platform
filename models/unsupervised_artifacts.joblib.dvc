@@ -1,0 +1,5 @@
+outs:
+- md5: 0a2241b7a2d0b9b9a75a080af41e1268
+  size: 219256557
+  hash: md5
+  path: unsupervised_artifacts.joblib
