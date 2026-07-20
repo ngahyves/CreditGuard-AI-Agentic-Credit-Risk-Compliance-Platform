@@ -13,7 +13,7 @@ env:
 
 jobs:
   quality-assurance:
-    name: Unit Tests & Validation
+    name: Run Unit Tests & Data Validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,13 +23,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
+          pip install pytest 
           pip install -r requirements.txt
 
-      - name: Run Pytest
+      - name: Execute Pytest
+        # PLACE PLACEHOLDER VARIABLES
+        # This prevents SQLAlchemy and LLMs from crashing during import
+        env:
+          DATABASE_URL: sqlite:///./test.db
+          API_KEY_SECRET: "dummy_secret_for_tests"
+          GROQ_API_KEY: "gsk_dummy_key"
+          GEMINI_API_KEY: "dummy_gemini_key"
+          LANGCHAIN_API_KEY: "dummy_ls_key"
+          LOG_LEVEL: "INFO"
         run: python -m pytest tests/
 
   build-and-deploy:
