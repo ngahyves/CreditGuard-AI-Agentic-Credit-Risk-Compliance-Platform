@@ -18,6 +18,7 @@ data/interim/
 !data/processed/feature_metadata.json
 !/data/processed/final_enriched_modeling_matrix.parquet
 data/processed/*.parquet
+untitled-1.md
 
 
 # --- Models & Artifacts ---
@@ -28,6 +29,7 @@ mlflow_db/
 mlflow.db
 catboost_info/
 !models/fitted_preprocessor.joblib
+!models/unsupervised_artifacts.joblib.
 
 
 # --- Monitoring & Vector Store ---
