@@ -20,12 +20,12 @@
 - **Compliance Gap:** Black-box models struggle to meet "right to explanation" expectations and can silently inherit historical biases.
 
 **What This Project Demonstrates:**
-- A full relational data engineering pipeline across 7 tables (307K applicants), with statistically rigorous feature selection.
-- A hybrid supervised/unsupervised modeling approach, enriching a LightGBM classifier (AUC 0.78 / Gini 0.54) with unsupervised risk personas.
-- A documented, honest fairness audit — including a mitigation attempt that was **evaluated and deliberately not deployed** after revealing a commercial viability trade-off.
-- An Agentic RAG system (LangGraph + Llama 3 via Groq) generating human-readable, policy-grounded credit memos.
-- A rigorously tested A/B framework comparing decision strategies against real unit economics — including a counter-intuitive negative result and its root-cause explanation.
-- A cloud-native, observable deployment (Docker, GCP Cloud Run, DVC, Prometheus/Grafana, CI/CD).
+- A full relational data engineering pipeline across **7 tables (307K applicants)**, with statistically rigorous feature selection.
+- A hybrid supervised/unsupervised modeling approach, enriching a **LightGBM classifier (AUC 0.78 / Gini 0.54) with unsupervised risk personas**.
+- A documented, honest **fairness audit** — including a mitigation attempt that was **evaluated and deliberately not deployed** after revealing a commercial viability trade-off.
+- An Agentic **RAG system (LangGraph + Llama 3 via Groq)** generating human-readable, policy-grounded credit memos.
+- A rigorously **tested A/B** framework comparing decision strategies against real unit economics — including a counter-intuitive negative result and its root-cause explanation.
+- A cloud-native, **observable deployment** (Docker, GCP Cloud Run, DVC, Prometheus/Grafana, CI/CD).
 
 > This README documents the technical journey honestly, including limitations and negative results — the reasoning behind each decision matters more than any single metric.
 
