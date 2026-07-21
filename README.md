@@ -12,7 +12,7 @@
 
 ## 🚀 Executive Summary
 
-**Objective:** Develop an end-to-end platform to automate and audit high-stakes consumer credit decisions using the Home Credit Default Risk https://www.kaggle.com/competitions/home-credit-default-risk (Kaggle competition dataset). The system specifically addresses a highly imbalanced classification challenge (only ~8% default rate) by integrating Gradient Boosting predictive power with Generative AI-driven agentic reasoning for automated regulatory compliance.
+**Objective:** Develop an end-to-end platform to automate and audit high-stakes consumer credit decisions using the **Home Credit Default Risk** https://www.kaggle.com/competitions/home-credit-default-risk (Kaggle competition dataset). The system specifically addresses a highly imbalanced classification challenge (only ~8% default rate) by integrating Gradient Boosting predictive power with Generative AI-driven agentic reasoning for automated regulatory compliance.
 
 **The Problem:**
 - **Operational Bottleneck:** Manual credit memo drafting takes significant analyst time per file.
