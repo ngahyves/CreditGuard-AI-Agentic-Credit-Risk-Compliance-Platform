@@ -603,3 +603,58 @@ C'est instantané car c'est sur ton disque dur.Envoie les "tickets de caisse" (.
 ==>git add models/*.dvc data/processed/*.dvc .gitignore
 ==>git commit -m "feat: track ML artifacts with DVC local remote"
 ==>git push origin main
+
+
+
+Méthode gcp
+Étape 1 : Créer le coffre-fort sur Google Cloud (GCS)
+Ouvre ton terminal (celui connecté à gcloud) et crée un bucket (un dossier cloud) pour stocker tes modèles.
+code
+Bash
+# 1. Crée le bucket (choisis un nom unique, ex: intelliloan-data-XXXX)
+gcloud storage buckets create gs://intelliloan-artifacts --location=northamerica-northeast1
+
+# 2. Configure DVC pour utiliser ce bucket comme nouveau Remote
+dvc remote add -d storage gs://intelliloan-artifacts-yourname
+
+# 3. Envoie tes vrais modèles sur le Cloud Google
+dvc push
+Désormais, tes 200 Mo de modèles sont stockés en toute sécurité chez Google.
+Étape 2 : Autoriser GitHub à récupérer les modèles
+Ton pipeline GitHub Actions a déjà la clé GCP_SA_KEY. Nous allons simplement lui donner le droit de lire dans le bucket.
+Va sur ta Console GCP > IAM.
+Trouve ton compte de service (github-actions-deployer).
+Ajoute-lui le rôle : Administrateur des objets de stockage (Storage Object Viewer).
+Étape 3 : Mettre à jour le Pipeline CI/CD (ci_cd.yaml)
+C'est ici que la magie opère. Au lieu de créer des fichiers vides (touch), GitHub va "pousser" (pull) les vrais fichiers depuis ton bucket avant de construire l'image Docker.
+Modifie ton fichier .github/workflows/ci_cd.yaml :
+code
+Yaml
+# ... (début identique)
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v3
+
+      # 1. AUTHENTICATE TO GCP (Besoin de la clé pour DVC)
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      # 2. INSTALL DVC
+      - name: Setup DVC
+        run: |
+          pip install dvc dvc-gs
+          
+      # 3. PULL REAL ARTIFACTS FROM GCP BUCKET
+      # GitHub va télécharger tes 200Mo de modèles directement depuis Google
+      - name: Pull Data from DVC
+        run: dvc pull
+
+      # 4. BUILD & PUSH (Maintenant Docker trouvera les VRAIS fichiers)
+      - name: Build and Push Container
+        run: |
+          docker build -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # ... (déploiement identique)
