@@ -1,30 +1,69 @@
-# --- SYSTEM & ENVS ---
+# ==========================================
+# 1. ENVIRONNEMENTS & CACHES 
+# ==========================================
+credit_env/
+venv/
+.env
+.env_example
 **/.git/
 **/.gitignore
 **/.dockerignore
+**/.gcloudignore
 **/.ipynb_checkpoints/
 **/__pycache__/
 **/*.pyc
-credit_env/
-.env
+**/*.pyo
+catboost_info/
+mlartifacts/
+mlruns/
+mlflow.db
+mlflow_db/
+logs/
 
-# --- MLFLOW & CACHE ---
-**/mlruns/
-**/mlartifacts/
-**/mlflow_db/
-**/mlflow.db
-**/catboost_info/
 
-# --- NOTEBOOKS & TESTS ---
-**/notebooks/
-**/src/eda/
-**/tests/
+# Enable the code and configuration
+!src/
+!config/
+!requirements.txt
+!Dockerfile
+
+# ==========================================
+# 2. CODE NOT USED IN PRODUCTION
+# ==========================================
+notebooks/
+src/eda/
+tests/
 test.tar.gz
+test.db
+fallback.db
 
-# --- DATA ---
-**/data/raw/
-**/data/interim/
-**/data/processed/master_ingested_v0.3.0.parquet
-**/data/processed/ml_ready_matrix.parquet
-**/data/processed/final_modeling_table.parquet
+# ==========================================
+# 3. DATA
+# ==========================================
+# EXCEPTIONS : We explicitly authorize what the API needs
+# (Even if we ignore other Parquet files above it)
+!data/processed/
+!data/processed/feature_metadata.json
+!data/processed/final_modeling_matrix.parquet
+!data/processed/final_enriched_modeling_matrix.parquet
+!data/vectorstore/
+
+data/raw/
+data/interim/
+
+# Exclude large training files
+data/processed/master_ingested_v0.3.0.parquet
+data/processed/ml_ready_matrix.parquet
+data/processed/final_modeling_table.parquet
+
+# ==========================================
+# 4. RAG Knowledge
+# ==========================================
+!data/vectorstore/
+
+# ==========================================
+# 5. Authorize the models (that DVC will pull)
+# ==========================================
+!models/
+!models/*.joblib
 

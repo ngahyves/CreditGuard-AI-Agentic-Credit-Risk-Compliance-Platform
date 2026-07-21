@@ -1,39 +1,31 @@
-# --- Python & Environments ---
+# --- Python & Envs ---
 credit_env/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .pytest_cache/
-.mypy_cache/
 test.tar.gz
-*.tar.gz
-
-# --- Secrets & Config ---
-.env
-config/secrets.yaml
-
-# --- Data (Very Important: avoid pushing large parquets) ---
-data/raw/
-data/interim/
-!data/processed/feature_metadata.json
-!/data/processed/final_enriched_modeling_matrix.parquet
-data/processed/*.parquet
-untitled-1.md
-
-
-# --- Models & Artifacts ---
-mlartifacts/
-mlruns/
-mlflow_db/
-mlflow.db
 catboost_info/
 
+# --- Secrets ---
+.env
 
+# --- Data & Models (Managed by DVC) ---
+data/raw/
+data/interim/
+data/processed/*.parquet
+models/*.joblib
 
-# --- Monitoring & Vector Store ---
-data/sql/
+# We let DVC handle these exceptions using its own local .gitignore files
+
+# --- Exceptions (Small, Essential Configuration Files) ---
+!data/processed/feature_metadata.json
+!config/raw_schema.json
+!config/processed_schema.json
+
+# --- MLflow & Logs ---
+mlruns/
+mlartifacts/
+mlflow_db/
+mlflow.db
 logs/
-
-# --- IDE ---
-.vscode/
-.idea/
